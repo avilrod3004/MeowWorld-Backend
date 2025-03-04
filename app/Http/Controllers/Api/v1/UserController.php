@@ -132,7 +132,7 @@ class UserController extends Controller {
         // Solo actualizar los campos necesarios (email o password)
         $user->fill($request->only(['email']));
 
-        // Verificar si hay cambios, si no, retornar un mensaje
+        // Verificar si hay cambios, si no, devuelve un mensaje
         if (!$user->isDirty()) {
             return response()->json([
                 'status' => false,
