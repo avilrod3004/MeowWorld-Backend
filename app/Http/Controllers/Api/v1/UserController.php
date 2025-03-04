@@ -118,24 +118,29 @@ class UserController extends Controller {
             ], 401);
         }
 
+        // Validar los campos recibidos
         $request->validate([
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|required|string|min:8|confirmed',
+            'password' => 'sometimes|required|string|min:8|confirmed',  // confirmación de contraseña
         ]);
 
+        // Si el campo password está presente y es válido, actualizar la contraseña
         if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
+            $user->password = Hash::make($request->password);  // Hash de la nueva contraseña
         }
 
+        // Solo actualizar los campos necesarios (email o password)
         $user->fill($request->only(['email']));
 
-        if (!$user->isDirty() && !$request->filled('password')) {
+        // Verificar si hay cambios, si no, retornar un mensaje
+        if (!$user->isDirty()) {
             return response()->json([
                 'status' => false,
                 'message' => 'No se realizaron cambios en las credenciales'
             ], 400);
         }
 
+        // Guardar los cambios
         $user->save();
 
         return response()->json([
@@ -144,6 +149,7 @@ class UserController extends Controller {
             'data' => $user
         ], 200);
     }
+
 
     /**
      * Elimina un usuario identificado por su id
