@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -58,6 +59,26 @@ class UserController extends Controller {
             'data' => $user
         ], 200);
     }
+
+    public function uploadimage(Request $request) {
+        // Validar que se ha enviado un archivo
+        $request->validate([
+            'img_profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        if ($request->hasFile('img_profile')) {
+            $result = Cloudinary::upload($request->file('img_profile')->getRealPath());
+
+            $url = $result->getSecurePath();
+            $public_id = $result->getPublicId();
+
+            return response()->json(['url' => $url, 'public_id' => $public_id]);
+        }
+
+        return response()->json(['error' => 'No se ha subido ninguna imagen'], 400);
+    }
+
+
 
 
     /**

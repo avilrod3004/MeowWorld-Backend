@@ -33,7 +33,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Controlador de usuarios
     Route::get('users', [UserController::class, 'index']);
     Route::get('users/profile', [UserController::class, 'profile']);
+    Route::post('users/uploadimage', [UserController::class, 'uploadimage']);
     Route::get('users/{id}', [UserController::class, 'show']);
-    Route::put('users/{id}', [UserController::class, 'update']);
+//    Route::put('users/{id}', [UserController::class, 'update']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 });
