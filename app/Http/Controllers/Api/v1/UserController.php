@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller {
 
@@ -60,47 +61,86 @@ class UserController extends Controller {
         ], 200);
     }
 
-    public function uploadimage(Request $request) {
-        // Validar que se ha enviado un archivo
+    /**
+     * Actualiza los datos del usuario logueado, incluyendo la imagen de perfil
+     */
+    public function updateProfile(Request $request, $id): JsonResponse {
+        $user = Auth::user();
+
+        if ($user->id != $id) {
+            return response()->json([
+                'status' => false,
+                'errors' => 'No tienes permisos para realizar cambios'
+            ], 401);
+        }
+
         $request->validate([
-            'img_profile' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'name' => 'sometimes|required|string|max:255',
+            'username' => 'sometimes|required|string|max:80|unique:users,username,' . $user->id,
+            'description' => 'nullable|string',
+            'img_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         if ($request->hasFile('img_profile')) {
             $result = Cloudinary::upload($request->file('img_profile')->getRealPath());
-
-            $url = $result->getSecurePath();
-            $public_id = $result->getPublicId();
-
-            return response()->json(['url' => $url, 'public_id' => $public_id]);
+            $user->img_profile = $result->getSecurePath();
         }
 
-        return response()->json(['error' => 'No se ha subido ninguna imagen'], 400);
-    }
+        // Actualizar solo los campos válidos
+        $user->fill($request->only(['name', 'username', 'description']));
 
-
-
-
-    /**
-     * Actualiza los datos de un usuario identificado por su id
-     * @param Request $request
-     * @param $id
-     * @return JsonResponse
-     */
-    public function update(Request $request, $id): JsonResponse {
-        $user = User::find($id);
-
-        if (!$user) {
+        if (!$user->isDirty() && !$request->hasFile('img_profile')) {
             return response()->json([
                 'status' => false,
-                'errors' => 'Usuario no encontrado'
-            ], 404);
+                'message' => 'No se realizaron cambios en el perfil'
+            ], 400);
         }
 
-        $user->update($request->all());
+        $user->save();
+
         return response()->json([
             'status' => true,
-            'message' => 'Usuario actualizado correctamente',
+            'message' => 'Perfil actualizado correctamente',
+            'data' => $user
+        ], 200);
+    }
+
+    /**
+     * Actualiza el email o contraseña del usuario logueado
+     */
+    public function updateCredentials(Request $request, $id): JsonResponse {
+        $user = Auth::user();
+
+        if ($user->id != $id) {
+            return response()->json([
+                'status' => false,
+                'errors' => 'No tienes permisos para realizar cambios'
+            ], 401);
+        }
+
+        $request->validate([
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|required|string|min:8|confirmed',
+        ]);
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->fill($request->only(['email']));
+
+        if (!$user->isDirty() && !$request->filled('password')) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No se realizaron cambios en las credenciales'
+            ], 400);
+        }
+
+        $user->save();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Credenciales actualizadas correctamente',
             'data' => $user
         ], 200);
     }
