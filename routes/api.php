@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\AuthController;
+use App\Http\Controllers\Api\v1\CatController;
 use App\Http\Controllers\Api\v1\PostController;
 use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Http\Request;
@@ -41,11 +42,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Controlador de posts
 //    Route::group(['prefix' => 'v1/posts'], function () {})  ???
-
     Route::get('v1/posts', [PostController::class, 'index']);
     Route::get('v1/posts/user/{id}', [PostController::class, 'getUserPosts']);
     Route::get('v1/posts/{id}', [PostController::class, 'show']);
     Route::post('v1/posts', [PostController::class, 'store']);
     Route::put('v1/posts/{id}', [PostController::class, 'update']);
     Route::delete('v1/posts/{id}', [PostController::class, 'destroy']);
+
+    // Controlador de gatos
+    Route::get('v1/cats', [CatController::class, 'index']);
+    Route::get('v1/cats/user/{id}', [CatController::class, 'getUserCats']);
+    Route::get('v1/cats/{id}', [CatController::class, 'show']);
+    Route::post('v1/cats', [CatController::class, 'store']);
+    Route::put('v1/cats/{id}', [CatController::class, 'update']);
+    Route::delete('v1/cats/{id}', [CatController::class, 'destroy']);
 });
