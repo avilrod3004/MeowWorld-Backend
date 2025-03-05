@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\v1\AuthController;
+use App\Http\Controllers\Api\v1\PostController;
 use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,5 +41,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 
     // Controlador de posts
-    Route::apiResource('v1/posts', App\Http\Controllers\Api\v1\PostController::class)->middleware('api');
+    Route::apiResource('v1/posts', PostController::class)->middleware('api');
 });

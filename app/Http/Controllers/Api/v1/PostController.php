@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\UpdatePostRequest;
 use App\Http\Resources\v1\PostResource;
 use App\Models\Post;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\v1\PostRequest;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PostController extends Controller {
     /**
@@ -17,6 +21,7 @@ class PostController extends Controller {
      */
     public function index(): JsonResponse {
         $posts = Post::latest()->paginate();
+
         return response()->json([
             'status' => true,
             'data' => PostResource::collection($posts),
@@ -40,26 +45,22 @@ class PostController extends Controller {
      * Store a newly created resource in storage.
      */
     public function store(PostRequest $request): JsonResponse {
-        // Obtener el usuario autenticado
         $user = Auth::user();
 
-        // Crear un nuevo post
         $post = new Post();
         $post->description = $request->input('description');
         $post->user()->associate($user);
 
-        // Subir la imagen obligatoria
         if ($request->hasFile('image')) {
             $result = Cloudinary::upload($request->file('image')->getRealPath());
+
+            if (!$result) {
+                throw new HttpException("No se pudo crear el post. Error al guardar la imagen.");
+            }
+
             $post->image = $result->getSecurePath();
-        } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'La imagen es obligatoria para crear un post',
-            ], 422);
         }
 
-        // Guardar el post en la base de datos
         $res = $post->save();
 
         if ($res) {
@@ -68,12 +69,9 @@ class PostController extends Controller {
                 'message' => 'Post creado correctamente',
                 'data' => new PostResource($post)
             ], 201);
+        } else {
+            throw new HttpException("No se pudo crear el post");
         }
-
-        return response()->json([
-            'status' => false,
-            'message' => 'No se pudo crear el post',
-        ], 500);
     }
 
     /**
@@ -83,10 +81,7 @@ class PostController extends Controller {
         $post = Post::find($id);
 
         if (!$post) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Usuario no encontrado'
-            ], 404);
+            throw new ModelNotFoundException("Post no encontrado");
         }
 
         return response()->json([
@@ -97,31 +92,23 @@ class PostController extends Controller {
 
     /**
      * Update the specified resource in storage.
+     * @throws AuthorizationException
      */
-    public function update(Request $request, $id): JsonResponse {
+    public function update(UpdatePostRequest $request, $id): JsonResponse {
         $post = Post::find($id);
 
         if (!$post) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Post no encontrado'
-            ], 404);
+            throw new ModelNotFoundException("Post no encontrado");
         }
 
         if (Auth::user()->id !== $post->user_id) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No tines permisos para realizar esta accion'
-            ], 403);
+            throw new AuthorizationException();
         }
-
-        $request->validate([
-            'description' => 'required|max:2000',
-        ]);
 
         $post->description = $request->input('description');
 
         $res = $post->save();
+
         if ($res) {
             return response()->json([
                 'status' => true,
@@ -129,32 +116,24 @@ class PostController extends Controller {
                 'data' => new PostResource($post)
             ], 200);
         } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'No se pudo actualizar el post',
-            ], 400);
+            throw new HttpException("No se pudo actualizar el post");
         }
     }
 
 
     /**
      * Remove the specified resource from storage.
+     * @throws AuthorizationException
      */
     public function destroy($id): JsonResponse {
         $post = Post::find($id);
 
         if (!$post) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Post no encontrado'
-            ], 404);
+            throw new ModelNotFoundException("Post no encontrado");
         }
 
         if (Auth::user()->id !== $post->user_id) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'No tienes permisos para realizar esta accion'
-            ], 401);
+            throw new AuthorizationException();
         }
 
         $res = $post->delete();
@@ -165,10 +144,7 @@ class PostController extends Controller {
                 'message' => 'Post eliminado correctamente'
             ], 200);
         } else {
-            return response()->json([
-                'status' => false,
-                'message' => 'No se pudo eliminar el post',
-            ], 400);
+            throw new HttpException("No se pudo eliminar el post");
         }
     }
 }
