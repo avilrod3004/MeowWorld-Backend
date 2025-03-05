@@ -38,4 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{id}/profile', [UserController::class, 'updateProfile']);
     Route::post('/users/{id}/credentials', [UserController::class, 'updateCredentials']);
     Route::delete('users/{id}', [UserController::class, 'destroy']);
+
+    // Controlador de posts
+    Route::apiResource('v1/posts', App\Http\Controllers\Api\v1\PostController::class)->middleware('api');
 });
