@@ -20,7 +20,7 @@ class PostController extends Controller {
      * Display a listing of the resource.
      */
     public function index(): JsonResponse {
-        $posts = Post::latest()->paginate();
+        $posts = Post::latest()->paginate(12);
 
         return response()->json([
             'status' => true,
@@ -40,6 +40,32 @@ class PostController extends Controller {
             ]
         ], 200);
     }
+
+    /**
+     * Display a listing of the posts by a specific user.
+     */
+    public function getUserPosts($userId): JsonResponse {
+        $posts = Post::where('user_id', $userId)->latest()->paginate(12);
+
+        return response()->json([
+            'status' => true,
+            'data' => PostResource::collection($posts),
+            'meta' => [
+                'current_page' => $posts->currentPage(),
+                'from' => $posts->firstItem(),
+                'last_page' => $posts->lastPage(),
+                'per_page' => $posts->perPage(),
+                'total' => $posts->total(),
+            ],
+            'links' => [
+                'first' => $posts->url(1),
+                'last' => $posts->url($posts->lastPage()),
+                'prev' => $posts->previousPageUrl(),
+                'next' => $posts->nextPageUrl(),
+            ]
+        ], 200);
+    }
+
 
     /**
      * Store a newly created resource in storage.
