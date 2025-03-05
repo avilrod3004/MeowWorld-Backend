@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('users/{id}', [UserController::class, 'destroy']);
 
     // Controlador de posts
+//    Route::group(['prefix' => 'v1/posts'], function () {})  ???
+
     Route::get('v1/posts', [PostController::class, 'index']);
     Route::get('v1/posts/user/{id}', [PostController::class, 'getUserPosts']);
     Route::get('v1/posts/{id}', [PostController::class, 'show']);
