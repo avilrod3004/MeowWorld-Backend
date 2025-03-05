@@ -96,13 +96,20 @@ class UserController extends Controller {
             ], 400);
         }
 
-        $user->save();
+        $res = $user->save();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Perfil actualizado correctamente',
-            'data' => $user
-        ], 200);
+        if (!$res) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Perfil actualizado correctamente',
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => true,
+                'message' => 'No se pudo actualizar el perfil',
+            ], 400);
+        }
     }
 
     /**
@@ -141,13 +148,20 @@ class UserController extends Controller {
         }
 
         // Guardar los cambios
-        $user->save();
+        $res = $user->save();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Credenciales actualizadas correctamente',
-            'data' => $user
-        ], 200);
+        if ($res) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Credenciales actualizadas correctamente',
+                'data' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => true,
+                'message' => 'No se pudo actualizar las credenciales',
+            ], 400);
+        }
     }
 
 
@@ -166,10 +180,18 @@ class UserController extends Controller {
             ], 404);
         }
 
-        $user->delete();
-        return response()->json([
-            'status' => true,
-            'message' => 'Usuario eliminado correctamente',
-        ], 200);
+        $res = $user->delete();
+
+        if ($res) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Usuario eliminado correctamente',
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => false,
+                'errors' => 'No se pudo eliminar el usuario'
+            ], 400);
+        }
     }
 }
