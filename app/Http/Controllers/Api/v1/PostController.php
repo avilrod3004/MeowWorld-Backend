@@ -20,7 +20,7 @@ class PostController extends Controller {
      * Display a listing of the resource.
      */
     public function index(): JsonResponse {
-        $posts = Post::latest()->paginate(12);
+        $posts = Post::orderBy('created_at', 'desc')->paginate(12);
 
         return response()->json([
             'status' => true,
@@ -45,7 +45,7 @@ class PostController extends Controller {
      * Display a listing of the posts by a specific user.
      */
     public function getUserPosts($userId): JsonResponse {
-        $posts = Post::where('user_id', $userId)->latest()->paginate(12);
+        $posts = Post::where('user_id', $userId)->orderBy('created_at', 'desc')->paginate(12);
 
         return response()->json([
             'status' => true,
