@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CatController;
 use App\Http\Controllers\Api\v1\ComentarioController;
+use App\Http\Controllers\Api\v1\FollowController;
 use App\Http\Controllers\Api\v1\PostController;
 use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Http\Request;
@@ -65,4 +66,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('v1/comments/{id}', [ComentarioController::class, 'show']);
     Route::post('v1/comments', [ComentarioController::class, 'store']);
     Route::delete('v1/comments/{id}', [ComentarioController::class, 'destroy']);
+
+    // Controlar de seguidos
+    Route::get('v1/follows/followers/{id}', [FollowController::class, 'getFollowers']);
+    Route::get('v1/follows/following/{id}', [FollowController::class, 'getFollowing']);
+    Route::get('v1/follows/isfollowing/{id}', [FollowController::class, 'isFollowing']);
+    Route::get('v1/follows/isfollowed/{id}', [FollowController::class, 'isFollowed']);
+    Route::post('v1/follows', [FollowController::class, 'store']);
+    Route::delete('v1/follows/unfollow/{id}', [FollowController::class, 'destroy']);
 });
