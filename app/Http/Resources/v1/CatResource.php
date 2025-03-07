@@ -12,8 +12,16 @@ class CatResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
-    {
-        return parent::toArray($request);
+    public function toArray(Request $request): array {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'image' => $this->image,
+            'en_adopcion' => $this->en_adopcion,
+            'owner' => [
+                'username' => $this->user->username,
+            ]
+        ];
     }
 }
