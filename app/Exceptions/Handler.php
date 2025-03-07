@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -12,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -38,6 +40,14 @@ class Handler extends ExceptionHandler
     }
 
     public function render($request, Throwable $e): Response|JsonResponse|\Symfony\Component\HttpFoundation\Response|RedirectResponse {
+        // No hay un usuario autenticado
+        if ($e instanceof AuthenticationException) {
+            return response()->json([
+                'status' => false,
+                'message' => 'No autenticado. Por favor, inicia sesión para continuar.',
+            ], 401);
+        }
+
         // Recursos no encontrados
         if ($e instanceof ModelNotFoundException) {
             return response()->json([

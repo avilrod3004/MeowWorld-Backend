@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CatController;
+use App\Http\Controllers\Api\v1\ComentarioController;
 use App\Http\Controllers\Api\v1\PostController;
 use App\Http\Controllers\Api\v1\UserController;
 use Illuminate\Http\Request;
@@ -56,4 +57,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('v1/cats', [CatController::class, 'store']);
     Route::post('v1/cats/{id}', [CatController::class, 'update']);
     Route::delete('v1/cats/{id}', [CatController::class, 'destroy']);
+
+    // Controlador de comentarios
+    Route::get('v1/comments', [ComentarioController::class, 'index']);
+    Route::get('v1/comments/post/{id}', [ComentarioController::class, 'getPostComentarios']);
+    Route::get('v1/comments/user/{id}', [ComentarioController::class, 'getUserComentarios']);
+    Route::get('v1/comments/{id}', [ComentarioController::class, 'show']);
+    Route::post('v1/comments', [ComentarioController::class, 'store']);
+    Route::delete('v1/comments/{id}', [ComentarioController::class, 'destroy']);
 });
