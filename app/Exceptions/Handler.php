@@ -44,7 +44,9 @@ class Handler extends ExceptionHandler
         if ($e instanceof AuthenticationException) {
             return response()->json([
                 'status' => false,
-                'message' => 'No autenticado. Por favor, inicia sesión para continuar.',
+                'errors' => [
+                    'No autenticado. Por favor, inicia sesión para continuar.'
+                ],
             ], 401);
         }
 
@@ -52,7 +54,9 @@ class Handler extends ExceptionHandler
         if ($e instanceof ModelNotFoundException) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'errors' => [
+                    $e->getMessage()
+                ],
             ], 404);
         }
 
@@ -60,7 +64,7 @@ class Handler extends ExceptionHandler
         if ($e instanceof ValidationException) {
             return response()->json([
                 'status' => false,
-                'error' => $e->validator->errors(),
+                'errors' => $e->validator->errors(),
             ], 422);
         }
 
@@ -68,7 +72,9 @@ class Handler extends ExceptionHandler
         if ($e instanceof AuthorizationException) {
             return response()->json([
                 'status' => false,
-                'error' => 'No tienes permisos para realizar esta acción',
+                'errors' => [
+                    'No tienes permisos para realizar esta acción'
+                ],
             ], 403);
         }
 
@@ -76,7 +82,9 @@ class Handler extends ExceptionHandler
         if ($e instanceof HttpException) {
             return response()->json([
                 'status' => false,
-                'error' => $e->getMessage(),
+                'errors' => [
+                    $e->getMessage(),
+                ],
             ], 500);
         }
 
