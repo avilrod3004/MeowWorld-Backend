@@ -48,20 +48,6 @@ class UserController extends Controller {
     }
 
     /**
-     * Devuelve los datos del usuario logueado
-     *
-     * @return JsonResponse
-     */
-    public function profile(): JsonResponse {
-        $user = Auth::user();
-
-        return response()->json([
-            'status' => true,
-            'data' => $user
-        ], 200);
-    }
-
-    /**
      * Actualiza los datos del usuario logueado, incluyendo la imagen de perfil
      */
     public function updateProfile(Request $request, $id): JsonResponse {
