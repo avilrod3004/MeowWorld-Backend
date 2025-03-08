@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\UpdateCredentialsRequest;
+use App\Http\Resources\v1\UserResource;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class UserController extends Controller {
 
@@ -18,10 +23,24 @@ class UserController extends Controller {
      * @return JsonResponse
      */
     public function index(): JsonResponse {
-        $users = User::all();
+        $users = User::orderBy('created_at', 'desc')->paginate(12);
+
         return response()->json([
             'status' => true,
-            'data' => $users
+            'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'from' => $users->firstItem(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
+            'links' => [
+                'first' => $users->url(1),
+                'last' => $users->url($users->lastPage()),
+                'prev' => $users->previousPageUrl(),
+                'next' => $users->nextPageUrl(),
+            ]
         ], 200);
     }
 
@@ -35,15 +54,12 @@ class UserController extends Controller {
         $user = User::find($id);
 
         if (!$user) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Usuario no encontrado'
-            ], 404);
+            throw new ModelNotFoundException("Usuario no encontrado");
         }
 
         return response()->json([
             'status' => true,
-            'data' => $user
+            'data' => new UserResource($user)
         ], 200);
     }
 
@@ -54,99 +70,75 @@ class UserController extends Controller {
         $user = Auth::user();
 
         if ($user->id != $id) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'No tienes permisos para realizar cambios'
-            ], 401);
+            throw new AuthorizationException();
         }
 
-        $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'username' => 'sometimes|required|string|max:80|unique:users,username,' . $user->id,
-            'description' => 'nullable|string',
-            'img_profile' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        // Obtener datos validados
+        $validatedData = $request->validated();
 
         if ($request->hasFile('img_profile')) {
             $result = Cloudinary::upload($request->file('img_profile')->getRealPath());
+
+            if (!$result) {
+                throw new HttpException("No se pudo cambiar la foto de perfil. Error al guardar la imagen.");
+            }
+
             $user->img_profile = $result->getSecurePath();
         }
 
         // Actualizar solo los campos válidos
-        $user->fill($request->only(['name', 'username', 'description']));
+        $user->fill($validatedData);
 
         if (!$user->isDirty() && !$request->hasFile('img_profile')) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No se realizaron cambios en el perfil'
-            ], 400);
+            throw new HttpException("No se realizaron cambios en el perfil");
         }
 
-        $res = $user->save();
-
-        if (!$res) {
+        if ($user->save()) {
             return response()->json([
                 'status' => true,
                 'message' => 'Perfil actualizado correctamente',
-                'data' => $user
             ], 200);
         } else {
-            return response()->json([
-                'status' => true,
-                'message' => 'No se pudo actualizar el perfil',
-            ], 400);
+            throw new HttpException("No se pudo actualizar el perfil");
         }
     }
 
     /**
      * Actualiza el email o contraseña del usuario logueado
      */
-    public function updateCredentials(Request $request, $id): JsonResponse {
+    public function updateCredentials(UpdateCredentialsRequest $request, $id): JsonResponse {
         $user = Auth::user();
 
         if ($user->id != $id) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'No tienes permisos para realizar cambios'
-            ], 401);
+            throw new AuthorizationException();
         }
 
-        // Validar los campos recibidos
-        $request->validate([
-            'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|required|string|min:8|confirmed',  // confirmación de contraseña
-        ]);
+        // Obtener datos validados
+        $validatedData = $request->validated();
 
-        // Si el campo password está presente y es válido, actualizar la contraseña
-        if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);  // Hash de la nueva contraseña
+        // Verificar si se quiere cambiar la contraseña
+        if (!empty($validatedData['password'])) {
+            $user->password = Hash::make($validatedData['password']);
         }
 
-        // Solo actualizar los campos necesarios (email o password)
-        $user->fill($request->only(['email']));
+        // Actualizar email si se proporciona
+        if (!empty($validatedData['email']) && $validatedData['email'] !== $user->email) {
+            $user->email = $validatedData['email'];
+        }
 
-        // Verificar si hay cambios, si no, devuelve un mensaje
+        // Verificar si hay cambios
         if (!$user->isDirty()) {
-            return response()->json([
-                'status' => false,
-                'message' => 'No se realizaron cambios en las credenciales'
-            ], 400);
+            throw new HttpException("No se realizaron cambios en las credenciales");
         }
 
-        // Guardar los cambios
-        $res = $user->save();
-
-        if ($res) {
+        // Guardar cambios
+        if ($user->save()) {
             return response()->json([
                 'status' => true,
                 'message' => 'Credenciales actualizadas correctamente',
-                'data' => $user
             ], 200);
         } else {
-            return response()->json([
-                'status' => true,
-                'message' => 'No se pudo actualizar las credenciales',
-            ], 400);
+            throw new HttpException("No se pudo actualizar las credenciales");
         }
     }
 
@@ -160,10 +152,7 @@ class UserController extends Controller {
         $user = User::find($id);
 
         if (!$user) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Usuario no encontrado'
-            ], 404);
+            throw new ModelNotFoundException("Usuario no encontrado");
         }
 
         $res = $user->delete();
@@ -174,10 +163,7 @@ class UserController extends Controller {
                 'message' => 'Usuario eliminado correctamente',
             ], 200);
         } else {
-            return response()->json([
-                'status' => false,
-                'errors' => 'No se pudo eliminar el usuario'
-            ], 400);
+            throw new HttpException("No se puedo eliminar el usuario");
         }
     }
 }
