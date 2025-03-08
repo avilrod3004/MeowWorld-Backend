@@ -15,6 +15,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Throwable;
+use function PHPUnit\Framework\isEmpty;
 
 class Handler extends ExceptionHandler
 {
@@ -40,12 +41,12 @@ class Handler extends ExceptionHandler
     }
 
     public function render($request, Throwable $e): Response|JsonResponse|\Symfony\Component\HttpFoundation\Response|RedirectResponse {
-        // No hay un usuario autenticado
+        // Error durante la autenticación
         if ($e instanceof AuthenticationException) {
             return response()->json([
                 'status' => false,
                 'errors' => [
-                    'No autenticado. Por favor, inicia sesión para continuar.'
+                    empty($e->getMessage()) ? 'No autenticado. Por favor, inicia sesión para continuar.' : $e->getMessage(),
                 ],
             ], 401);
         }
