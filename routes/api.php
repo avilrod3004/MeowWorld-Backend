@@ -25,22 +25,22 @@ Route::get('/', function () {
     return "Hello world";
 });
 
-Route::post('auth/register', [AuthController::class, 'register']);
-Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('v1/auth/register', [AuthController::class, 'register']);
+Route::post('v1/auth/login', [AuthController::class, 'login']);
 
 // Rutas protegidas, accesibles por token
 Route::middleware('auth:sanctum')->group(function () {
     // Controlador de autenticacion
-    Route::get('auth/logout', [AuthController::class, 'logout']);
-    Route::post('auth/refresh', [AuthController::class, 'refresh']);
+    Route::get('v1/auth/logout', [AuthController::class, 'logout']);
+    Route::post('v1/auth/refresh', [AuthController::class, 'refresh']);
 
     // Controlador de usuarios
-    Route::get('users', [UserController::class, 'index']);
-    Route::get('users/profile', [UserController::class, 'profile']);
-    Route::get('users/{id}', [UserController::class, 'show']);
-    Route::post('users/{id}/profile', [UserController::class, 'updateProfile']);
-    Route::post('users/{id}/credentials', [UserController::class, 'updateCredentials']);
-    Route::delete('users/{id}', [UserController::class, 'destroy']);
+    Route::get('v1/users', [UserController::class, 'index']);
+    Route::get('v1/users/profile', [UserController::class, 'profile']);
+    Route::get('v1/users/{id}', [UserController::class, 'show']);
+    Route::post('v1/users/{id}/profile', [UserController::class, 'updateProfile']);
+    Route::post('v1/users/{id}/credentials', [UserController::class, 'updateCredentials']);
+    Route::delete('v1/users/{id}', [UserController::class, 'destroy']);
 
     // Controlador de posts
 //    Route::group(['prefix' => 'v1/posts'], function () {})  ???
