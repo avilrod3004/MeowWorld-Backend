@@ -31,12 +31,12 @@ Route::post('v1/auth/login', [AuthController::class, 'login']);
 // Rutas protegidas, accesibles por token
 Route::middleware('auth:sanctum')->group(function () {
     // Controlador de autenticacion
+    Route::get('v1/auth/me', [AuthController::class, 'me']);
     Route::get('v1/auth/logout', [AuthController::class, 'logout']);
     Route::post('v1/auth/refresh', [AuthController::class, 'refresh']);
 
     // Controlador de usuarios
     Route::get('v1/users', [UserController::class, 'index']);
-    Route::get('v1/users/profile', [UserController::class, 'profile']);
     Route::get('v1/users/{id}', [UserController::class, 'show']);
     Route::post('v1/users/{id}/profile', [UserController::class, 'updateProfile']);
     Route::post('v1/users/{id}/credentials', [UserController::class, 'updateCredentials']);
