@@ -3,32 +3,18 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\LoginRequest;
+use App\Http\Requests\v1\RegisterRequest;
+use App\Http\Resources\v1\UserResource;
 use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller {
-    public function register(Request $request): \Illuminate\Http\JsonResponse {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'username' => 'required|string|max:80|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-        ];
-
-        // crear validación
-        $validator = \Validator::make($request->input(), $rules);
-
-        // en caso de no cumplir las reglas
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()->all()
-            ], 400);
-        }
-
-        // crear el usuario
+    public function register(RegisterRequest $request): JsonResponse {
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
@@ -36,42 +22,23 @@ class AuthController extends Controller {
             'password' => Hash::make($request->password),
         ]);
 
-        // nombre del token
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'status' => true,
-            'message' => 'Usuario creado correctamente'
+            'message' => 'Usuario registrado correctamente'
         ], 200);
     }
 
-    public function login(Request $request): \Illuminate\Http\JsonResponse {
-        $rules = [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string',
-        ];
-
-        $validator = \Validator::make($request->input(), $rules);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'status' => false,
-                'errors' => $validator->errors()->all()
-            ], 400);
-        }
-
-        // si no coincide con un registro de la base de datos
+    /**
+     * @throws AuthenticationException
+     */
+    public function login(LoginRequest $request): JsonResponse {
         if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'status' => false,
-                'errors' => 'Credenciales invalidas'
-            ], 401);
+            throw new AuthenticationException("Crendiales invalidas");
         }
-
-        // buscar la infor del usuario en la base de datos
-        // $user = User::where('email', $request->email)->first();
 
         $user = Auth::user();
 
@@ -81,22 +48,20 @@ class AuthController extends Controller {
             'access_token' => $token,
             'token_type' => 'Bearer',
             'status' => true,
-            'message' => 'Login correcto',
-            'data' => $user
+            'message' => 'Sesión iniciada correctamente',
         ], 200);
     }
 
-    public function me(): \Illuminate\Http\JsonResponse
-    {
+    public function me(): JsonResponse {
         $user = Auth::user();
 
         return response()->json([
             'status' => true,
-            'data' => $user
+            'data' => new UserResource($user)
         ], 200);
     }
 
-    public function refresh(): \Illuminate\Http\JsonResponse {
+    public function refresh(): JsonResponse {
         $user = Auth::user();
 
         // Revoca el token anterior
@@ -113,7 +78,7 @@ class AuthController extends Controller {
         ], 200);
     }
 
-    public function logout(): \Illuminate\Http\JsonResponse {
+    public function logout(): JsonResponse {
         // Elimina todos los tokens que haya generado el usuario
         auth()->user()->tokens()->delete();
 
