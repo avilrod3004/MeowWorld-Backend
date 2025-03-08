@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\UpdateCredentialsRequest;
+use App\Http\Requests\v1\UpdateProfileRequest;
 use App\Http\Resources\v1\UserResource;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -66,7 +67,7 @@ class UserController extends Controller {
     /**
      * Actualiza los datos del usuario logueado, incluyendo la imagen de perfil
      */
-    public function updateProfile(Request $request, $id): JsonResponse {
+    public function updateProfile(UpdateProfileRequest $request, $id): JsonResponse {
         $user = Auth::user();
 
         if ($user->id != $id) {
