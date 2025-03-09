@@ -30,20 +30,31 @@ Route::post('v1/auth/login', [AuthController::class, 'login']);
 
 // Rutas protegidas, accesibles por token
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Rutas protegidas por rol de administrador
+    Route::middleware('role:admin')->group(function () {
+        // Controlador de usuarios
+        Route::get('v1/users', [UserController::class, 'index']);
+        Route::delete('v1/users/{id}', [UserController::class, 'destroy']);
+
+        // Controlador de gatos
+        Route::get('v1/cats', [CatController::class, 'index']);
+
+        // Controlador de comentarios
+        Route::get('v1/comments', [ComentarioController::class, 'index']);
+    });
+
     // Controlador de autenticacion
     Route::get('v1/auth/me', [AuthController::class, 'me']);
     Route::get('v1/auth/logout', [AuthController::class, 'logout']);
     Route::post('v1/auth/refresh', [AuthController::class, 'refresh']);
 
     // Controlador de usuarios
-    Route::get('v1/users', [UserController::class, 'index']);
     Route::get('v1/users/{id}', [UserController::class, 'show']);
     Route::post('v1/users/{id}/profile', [UserController::class, 'updateProfile']);
     Route::post('v1/users/{id}/credentials', [UserController::class, 'updateCredentials']);
-    Route::delete('v1/users/{id}', [UserController::class, 'destroy']);
 
     // Controlador de posts
-//    Route::group(['prefix' => 'v1/posts'], function () {})  ???
     Route::get('v1/posts', [PostController::class, 'index']);
     Route::get('v1/posts/user/{id}', [PostController::class, 'getUserPosts']);
     Route::get('v1/posts/{id}', [PostController::class, 'show']);
@@ -52,7 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('v1/posts/{id}', [PostController::class, 'destroy']);
 
     // Controlador de gatos
-    Route::get('v1/cats', [CatController::class, 'index']);
     Route::get('v1/cats/user/{id}', [CatController::class, 'getUserCats']);
     Route::get('v1/cats/{id}', [CatController::class, 'show']);
     Route::post('v1/cats', [CatController::class, 'store']);
@@ -60,7 +70,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('v1/cats/{id}', [CatController::class, 'destroy']);
 
     // Controlador de comentarios
-    Route::get('v1/comments', [ComentarioController::class, 'index']);
     Route::get('v1/comments/post/{id}', [ComentarioController::class, 'getPostComentarios']);
     Route::get('v1/comments/user/{id}', [ComentarioController::class, 'getUserComentarios']);
     Route::get('v1/comments/{id}', [ComentarioController::class, 'show']);

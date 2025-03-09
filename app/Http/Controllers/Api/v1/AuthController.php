@@ -6,15 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\LoginRequest;
 use App\Http\Requests\v1\RegisterRequest;
 use App\Http\Resources\v1\UserResource;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuthController extends Controller {
     public function register(RegisterRequest $request): JsonResponse {
+        // Crear el usuario
         $user = User::create([
             'name' => $request->name,
             'username' => $request->username,
@@ -22,15 +25,26 @@ class AuthController extends Controller {
             'password' => Hash::make($request->password),
         ]);
 
+        // Generar token
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Asignar el rol 'user'
+        $userRole = Role::where('name', 'user')->first();
+
+        if ($userRole) {
+            $user->roles()->attach($userRole);
+        } else {
+            throw new HttpException('Rol "user" no encontrado. Contacta con un administrador.');
+        }
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'Bearer',
             'status' => true,
-            'message' => 'Usuario registrado correctamente'
-        ], 200);
+            'message' => 'Usuario registrado correctamente',
+        ], 201);
     }
+
 
     /**
      * @throws AuthenticationException
