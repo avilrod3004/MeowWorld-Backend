@@ -129,7 +129,7 @@ class ComentarioController extends Controller {
             throw new ModelNotFoundException("Commentario no encontrado");
         }
 
-        if (Auth::user()->id !== $comment->user_id) {
+        if (Auth::user()->id !== $comment->user_id && !Auth::user()->hasRole("admin")) {
             throw new AuthorizationException();
         }
 

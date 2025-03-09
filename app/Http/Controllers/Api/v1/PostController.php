@@ -158,7 +158,7 @@ class PostController extends Controller {
             throw new ModelNotFoundException("Post no encontrado");
         }
 
-        if (Auth::user()->id !== $post->user_id) {
+        if (Auth::user()->id !== $post->user_id && !Auth::user()->hasRole("admin")) {
             throw new AuthorizationException();
         }
 

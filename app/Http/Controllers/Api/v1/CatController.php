@@ -23,7 +23,7 @@ class CatController extends Controller
      * Display a listing of the resource.
      */
     public function index(): JsonResponse {
-        $cats = Cat::paginate(10);;
+        $cats = Cat::paginate(10);
 
         return response()->json([
             'status' => true,
@@ -186,7 +186,7 @@ class CatController extends Controller
             throw new ModelNotFoundException("Gato no encontrado");
         }
 
-        if (Auth::user()->id !== $cat->user_id) {
+        if (Auth::user()->id !== $cat->user_id && !Auth::user()->hasRole("admin")) {
             throw new AuthorizationException();
         }
 
