@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\v1\CatRequest;
+use App\Http\Requests\v1\FilterCatRequest;
 use App\Http\Requests\v1\UpdateCatRequest;
 use App\Http\Resources\v1\CatResource;
 use App\Models\Cat;
@@ -24,6 +25,33 @@ class CatController extends Controller
      */
     public function index(): JsonResponse {
         $cats = Cat::paginate(10);
+
+        return response()->json([
+            'status' => true,
+            'data' => CatResource::collection($cats),
+            'meta' => [
+                'current_page' => $cats->currentPage(),
+                'from' => $cats->firstItem(),
+                'last_page' => $cats->lastPage(),
+                'per_page' => $cats->perPage(),
+                'total' => $cats->total(),
+            ],
+            'links' => [
+                'first' => $cats->url(1),
+                'last' => $cats->url($cats->lastPage()),
+                'prev' => $cats->previousPageUrl(),
+                'next' => $cats->nextPageUrl(),
+            ]
+        ], 200);
+    }
+
+    public function filterUsername(FilterCatRequest $request): JsonResponse {
+        $query = $request->input('query');
+
+        // Filtrar usuarios cuyo nombre contenga la palabra clave (case insensitive)
+        $cats = Cat::where('name', 'like', '%' . $query . '%')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
         return response()->json([
             'status' => true,

@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('v1/posts/{id}', [PostController::class, 'destroy']);
 
     // Controlador de gatos
+    Route::get('v1/cats/filter', [CatController::class, 'filterUsername']);
     Route::get('v1/cats/user/{id}', [CatController::class, 'getUserCats']);
     Route::get('v1/cats/{id}', [CatController::class, 'show']);
     Route::post('v1/cats', [CatController::class, 'store']);
