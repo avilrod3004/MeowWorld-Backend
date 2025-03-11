@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\v1\FilterUserRequest;
 use App\Http\Requests\v1\UpdateCredentialsRequest;
 use App\Http\Requests\v1\UpdateProfileRequest;
 use App\Http\Resources\v1\UserResource;
@@ -44,6 +45,33 @@ class UserController extends Controller {
             ]
         ], 200);
     }
+    public function filterUsername(FilterUserRequest $request): JsonResponse {
+        $query = $request->input('query');
+
+        // Filtrar usuarios cuyo nombre contenga la palabra clave (case insensitive)
+        $users = User::where('name', 'like', '%' . $query . '%')
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
+
+        return response()->json([
+            'status' => true,
+            'data' => UserResource::collection($users),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'from' => $users->firstItem(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
+            'links' => [
+                'first' => $users->url(1),
+                'last' => $users->url($users->lastPage()),
+                'prev' => $users->previousPageUrl(),
+                'next' => $users->nextPageUrl(),
+            ]
+        ], 200);
+    }
+
 
     /**
      * Devuelve los datos de un usuario identificado por su id

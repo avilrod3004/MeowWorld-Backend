@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('v1/auth/refresh', [AuthController::class, 'refresh']);
 
     // Controlador de usuarios
+    Route::get('v1/users/filter', [UserController::class, 'filterUsername']);
     Route::get('v1/users/{id}', [UserController::class, 'show']);
     Route::post('v1/users/{id}/profile', [UserController::class, 'updateProfile']);
     Route::post('v1/users/{id}/credentials', [UserController::class, 'updateCredentials']);
