@@ -197,7 +197,7 @@ class CatController extends Controller
                 'status' => true,
                 'message' => 'Información actualizada correctamente',
                 'data' => new CatResource($cat),
-            ], 201);
+            ], 200);
         } else {
             throw new HttpException("No se pudo actualizar la información del gato");
         }
