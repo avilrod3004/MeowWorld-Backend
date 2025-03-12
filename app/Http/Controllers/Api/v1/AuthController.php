@@ -42,6 +42,7 @@ class AuthController extends Controller {
             'token_type' => 'Bearer',
             'status' => true,
             'message' => 'Usuario registrado correctamente',
+            'data' => new UserResource($user),
         ], 201);
     }
 
@@ -63,6 +64,7 @@ class AuthController extends Controller {
             'token_type' => 'Bearer',
             'status' => true,
             'message' => 'Sesión iniciada correctamente',
+            'data' => new UserResource($user),
         ], 200);
     }
 
