@@ -113,7 +113,7 @@ class ComentarioController extends Controller {
             return response()->json([
                 'status' => true,
                 'data' => new ComentarioResource($comment),
-            ], 200);
+            ], 201);
         } else {
             throw new HttpException("Error al guardar el comentario");
         }
