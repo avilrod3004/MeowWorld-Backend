@@ -115,7 +115,7 @@ class UserController extends Controller {
             $user->img_profile = $result->getSecurePath();
         }
 
-//        $user->fill($validatedData);
+        $user->fill($validatedData);
 
 //        if (!$user->isDirty() && !$request->hasFile('img_profile')) {
 //            throw new HttpException("No se realizaron cambios en el perfil");
