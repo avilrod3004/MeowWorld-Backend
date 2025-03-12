@@ -90,6 +90,14 @@ class FollowController extends Controller {
             throw new ModelNotFoundException("El usuario al que quiere seguir no existe.");
         }
 
+        $followQuery = Follow::where('follower_id', $follower->id)
+            ->where('followed_id', $request->input('followed_id'))
+            ->first();
+
+        if ($followQuery) {
+            throw new HttpException("Ya sigues a ese usuario");
+        }
+
         $follow = new Follow();
         $follow->follower()->associate($follower);
         $follow->followed()->associate($followed);
@@ -122,11 +130,15 @@ class FollowController extends Controller {
             throw new ModelNotFoundException("No estás siguiendo a este usuario");
         }
 
-        $follow->delete();
+        $res = $follow->delete();
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Has dejado de seguir a este usuario'
-        ], 200);
+        if ($res) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Has dejado de seguir a este usuario'
+            ], 200);
+        } else {
+            throw new HttpException("No se pudo dejar de seguir al usuario..");
+        }
     }
 }
