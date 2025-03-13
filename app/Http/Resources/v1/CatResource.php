@@ -20,6 +20,7 @@ class CatResource extends JsonResource
             'image' => $this->image,
             'en_adopcion' => $this->en_adopcion,
             'owner' => [
+                'id' => $this->user->id,
                 'username' => $this->user->username,
             ]
         ];

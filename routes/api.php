@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\v1\AuthController;
 use App\Http\Controllers\Api\v1\CatController;
+use App\Http\Controllers\Api\v1\CatPostController;
 use App\Http\Controllers\Api\v1\ComentarioController;
 use App\Http\Controllers\Api\v1\FollowController;
 use App\Http\Controllers\Api\v1\LikeController;
@@ -92,4 +93,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('v1/likes/post/{id}', [LikeController::class, 'countPostLikes']);
     Route::get('v1/likes/isLiked/{id}', [LikeController::class, 'isLikedByUser']);
     Route::delete('v1/likes/{id}', [LikeController::class, 'destroy']);
+
+    // Controlador de la relacion gatos-posts
+    Route::post('v1/catpost', [CatPostController::class, 'store']);
+    Route::delete('v1/catpost', [CatPostController::class, 'destroy']);
+    Route::get('v1/catpost/cat/{id}', [CatPostController::class, 'getCatPosts']);
+    Route::get('v1/catpost/post/{id}', [CatPostController::class, 'getPostCats']);
 });

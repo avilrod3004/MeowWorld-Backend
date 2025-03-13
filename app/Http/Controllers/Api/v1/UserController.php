@@ -156,7 +156,7 @@ class UserController extends Controller {
 
         // Verificar si hay cambios
         if (!$user->isDirty()) {
-            throw new HttpException("No se realizaron cambios en las credenciales");
+            throw new HttpException(500,"Credenciales ya en uso");
         }
 
         // Guardar cambios
@@ -166,7 +166,7 @@ class UserController extends Controller {
                 'message' => 'Credenciales actualizadas correctamente',
             ], 200);
         } else {
-            throw new HttpException("No se pudo actualizar las credenciales");
+            throw new HttpException(500,"No se pudo actualizar las credenciales");
         }
     }
 

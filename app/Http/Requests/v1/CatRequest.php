@@ -25,7 +25,7 @@ class CatRequest extends FormRequest
         return [
             'name' => 'required|string|max:80',
             'description' => 'required|string|max:2000',
-            'image' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'en_adopcion' => 'required|string|in:true,false',
         ];
     }
@@ -44,7 +44,7 @@ class CatRequest extends FormRequest
             'image.max' => 'La imagen no debe ser mayor a 2MB.',
 
             'en_adopcion.required' => 'El campo en adopción es obligatorio',
-            'en_adopcion.boolean' => 'El campo en_adopcion solo puede ser "true" o "false".',
+            'en_adopcion.in' => 'El campo en_adopcion solo puede ser "true" o "false".',
         ];
     }
 }

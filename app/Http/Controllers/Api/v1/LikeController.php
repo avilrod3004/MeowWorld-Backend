@@ -41,11 +41,11 @@ class LikeController extends Controller {
 
         if ($res) {
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'message' => 'Like registrado exitosamente.',
             ], 200);
         } else {
-            throw new ModelNotFoundException("No se pudo registrar el like.");
+            throw new HttpException(500,"No se pudo registrar el like.");
         }
     }
 
@@ -96,11 +96,11 @@ class LikeController extends Controller {
 
         if ($res) {
             return response()->json([
-                'success' => true,
+                'status' => true,
                 'message' => 'Like eliminado exitosamente.',
             ]);
         } else {
-            throw new HttpException("No se pudo eliminar el like.");
+            throw new HttpException(500, "No se pudo eliminar el like.");
         }
     }
 }
