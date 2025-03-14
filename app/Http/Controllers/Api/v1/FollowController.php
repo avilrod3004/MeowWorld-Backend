@@ -95,7 +95,7 @@ class FollowController extends Controller {
             ->first();
 
         if ($followQuery) {
-            throw new HttpException("Ya sigues a ese usuario");
+            throw new HttpException(500, "Ya sigues a ese usuario");
         }
 
         $follow = new Follow();
@@ -110,7 +110,7 @@ class FollowController extends Controller {
                 'message' => 'Usuario seguido',
             ], 200);
         } else {
-            throw new HttpException("No se pudo seguir al usuario");
+            throw new HttpException(500, "No se pudo seguir al usuario");
         }
 
     }
@@ -138,7 +138,7 @@ class FollowController extends Controller {
                 'message' => 'Has dejado de seguir a este usuario'
             ], 200);
         } else {
-            throw new HttpException("No se pudo dejar de seguir al usuario..");
+            throw new HttpException(500, "No se pudo dejar de seguir al usuario..");
         }
     }
 }

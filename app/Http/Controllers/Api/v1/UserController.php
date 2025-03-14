@@ -51,24 +51,15 @@ class UserController extends Controller {
         // Filtrar usuarios cuyo nombre contenga la palabra clave (case insensitive)
         $users = User::where('name', 'like', '%' . $query . '%')
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->get();
+        $totalResults = $users->count();
 
         return response()->json([
             'status' => true,
             'data' => UserResource::collection($users),
             'meta' => [
-                'current_page' => $users->currentPage(),
-                'from' => $users->firstItem(),
-                'last_page' => $users->lastPage(),
-                'per_page' => $users->perPage(),
-                'total' => $users->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $users->url(1),
-                'last' => $users->url($users->lastPage()),
-                'prev' => $users->previousPageUrl(),
-                'next' => $users->nextPageUrl(),
-            ]
         ], 200);
     }
 
@@ -109,7 +100,7 @@ class UserController extends Controller {
             $result = Cloudinary::upload($request->file('img_profile')->getRealPath());
 
             if (!$result) {
-                throw new HttpException("No se pudo cambiar la foto de perfil. Error al guardar la imagen.");
+                throw new HttpException(500,"No se pudo cambiar la foto de perfil. Error al guardar la imagen.");
             }
 
             $user->img_profile = $result->getSecurePath();
@@ -127,7 +118,7 @@ class UserController extends Controller {
                 'message' => 'Perfil actualizado correctamente',
             ], 200);
         } else {
-            throw new HttpException("No se pudo actualizar el perfil");
+            throw new HttpException(500,"No se pudo actualizar el perfil");
         }
     }
 
@@ -191,7 +182,7 @@ class UserController extends Controller {
                 'message' => 'Usuario eliminado correctamente',
             ], 200);
         } else {
-            throw new HttpException("No se puedo eliminar el usuario");
+            throw new HttpException(500,"No se puedo eliminar el usuario");
         }
     }
 }

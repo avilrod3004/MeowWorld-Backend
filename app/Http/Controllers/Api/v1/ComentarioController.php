@@ -15,68 +15,41 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ComentarioController extends Controller {
     public function index() {
-        $comments = Comentario::orderBy('created_at', 'desc')->paginate(12);
+        $comments = Comentario::orderBy('created_at', 'desc')->get();
+        $totalResults = $comments->count();
 
         return response()->json([
             'status' => true,
             'data' => ComentarioResource::collection($comments),
             'meta' => [
-                'current_page' => $comments->currentPage(),
-                'from' => $comments->firstItem(),
-                'last_page' => $comments->lastPage(),
-                'per_page' => $comments->perPage(),
-                'total' => $comments->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $comments->url(1),
-                'last' => $comments->url($comments->lastPage()),
-                'prev' => $comments->previousPageUrl(),
-                'next' => $comments->nextPageUrl(),
-            ]
         ], 200);
     }
 
     public function getPostComentarios($post_id) {
-        $comments = Comentario::where('post_id', $post_id)->orderBy('created_at', 'desc')->paginate(12);
+        $comments = Comentario::where('post_id', $post_id)->orderBy('created_at', 'desc')->get();
+        $totalResults = $comments->count();
 
         return response()->json([
             'status' => true,
             'data' => ComentarioResource::collection($comments),
             'meta' => [
-                'current_page' => $comments->currentPage(),
-                'from' => $comments->firstItem(),
-                'last_page' => $comments->lastPage(),
-                'per_page' => $comments->perPage(),
-                'total' => $comments->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $comments->url(1),
-                'last' => $comments->url($comments->lastPage()),
-                'prev' => $comments->previousPageUrl(),
-                'next' => $comments->nextPageUrl(),
-            ]
         ], 200);
     }
 
     public function getUserComentarios($user_id) {
-        $comments = Comentario::where('user_id', $user_id)->orderBy('created_at', 'desc')->paginate(12);
+        $comments = Comentario::where('user_id', $user_id)->orderBy('created_at', 'desc')->get();
+        $totalResults = $comments->count();
 
         return response()->json([
             'status' => true,
             'data' => ComentarioResource::collection($comments),
             'meta' => [
-                'current_page' => $comments->currentPage(),
-                'from' => $comments->firstItem(),
-                'last_page' => $comments->lastPage(),
-                'per_page' => $comments->perPage(),
-                'total' => $comments->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $comments->url(1),
-                'last' => $comments->url($comments->lastPage()),
-                'prev' => $comments->previousPageUrl(),
-                'next' => $comments->nextPageUrl(),
-            ]
         ], 200);
     }
 
@@ -115,7 +88,7 @@ class ComentarioController extends Controller {
                 'data' => new ComentarioResource($comment),
             ], 201);
         } else {
-            throw new HttpException("Error al guardar el comentario");
+            throw new HttpException(500,"Error al guardar el comentario");
         }
     }
 
@@ -141,7 +114,7 @@ class ComentarioController extends Controller {
                 'message' => 'Comentario eliminado correctamente',
             ], 200);
         } else {
-            throw new HttpException("No se puedo eliminar el comentario");
+            throw new HttpException(500, "No se puedo eliminar el comentario");
         }
     }
 }

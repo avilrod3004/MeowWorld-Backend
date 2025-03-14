@@ -36,24 +36,15 @@ class PostController extends Controller {
      * Display a listing of the posts by a specific user.
      */
     public function getUserPosts($userId): JsonResponse {
-        $posts = Post::where('user_id', $userId)->orderBy('created_at', 'desc')->paginate(12);
+        $posts = Post::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
+        $totalResults = $posts->count();
 
         return response()->json([
             'status' => true,
             'data' => PostResource::collection($posts),
             'meta' => [
-                'current_page' => $posts->currentPage(),
-                'from' => $posts->firstItem(),
-                'last_page' => $posts->lastPage(),
-                'per_page' => $posts->perPage(),
-                'total' => $posts->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $posts->url(1),
-                'last' => $posts->url($posts->lastPage()),
-                'prev' => $posts->previousPageUrl(),
-                'next' => $posts->nextPageUrl(),
-            ]
         ], 200);
     }
 
@@ -72,7 +63,7 @@ class PostController extends Controller {
             $result = Cloudinary::upload($request->file('image')->getRealPath());
 
             if (!$result) {
-                throw new HttpException("No se pudo crear el post. Error al guardar la imagen.");
+                throw new HttpException(500,"No se pudo crear el post. Error al guardar la imagen.");
             }
 
             $post->image = $result->getSecurePath();
@@ -87,7 +78,7 @@ class PostController extends Controller {
                 'data' => new PostResource($post)
             ], 201);
         } else {
-            throw new HttpException("No se pudo crear el post");
+            throw new HttpException(500,"No se pudo crear el post");
         }
     }
 
@@ -133,7 +124,7 @@ class PostController extends Controller {
                 'data' => new PostResource($post)
             ], 200);
         } else {
-            throw new HttpException("No se pudo actualizar el post");
+            throw new HttpException(500,"No se pudo actualizar el post");
         }
     }
 
@@ -161,7 +152,7 @@ class PostController extends Controller {
                 'message' => 'Post eliminado correctamente'
             ], 200);
         } else {
-            throw new HttpException("No se pudo eliminar el post");
+            throw new HttpException(500,"No se pudo eliminar el post");
         }
     }
 }
