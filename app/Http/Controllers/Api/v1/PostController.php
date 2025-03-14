@@ -20,23 +20,14 @@ class PostController extends Controller {
      * Display a listing of the resource.
      */
     public function index(): JsonResponse {
-        $posts = Post::orderBy('created_at', 'desc')->paginate(12);
+        $posts = Post::orderBy('created_at', 'desc')->get();
+        $totalPosts = Post::count();
 
         return response()->json([
             'status' => true,
             'data' => PostResource::collection($posts),
             'meta' => [
-                'current_page' => $posts->currentPage(),
-                'from' => $posts->firstItem(),
-                'last_page' => $posts->lastPage(),
-                'per_page' => $posts->perPage(),
-                'total' => $posts->total(),
-            ],
-            'links' => [
-                'first' => $posts->url(1),
-                'last' => $posts->url($posts->lastPage()),
-                'prev' => $posts->previousPageUrl(),
-                'next' => $posts->nextPageUrl(),
+                'total' => $totalPosts,
             ]
         ], 200);
     }
