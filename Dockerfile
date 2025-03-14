@@ -38,8 +38,8 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# Exponer el puerto 9000 (para FPM)
+# Exponer el puerto 9000 (Render espera que la app escuche en algún puerto)
 EXPOSE 9000
 
-# Comando para generar la clave y arrancar PHP-FPM
-CMD php artisan key:generate --force && php-fpm
+# Comando para generar la clave, ejecutar migraciones y arrancar PHP-FPM
+CMD ["sh", "-c", "php artisan key:generate --force && php artisan migrate --force && php-fpm --nodaemonize"]
