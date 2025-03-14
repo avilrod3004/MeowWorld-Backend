@@ -48,27 +48,19 @@ class CatController extends Controller
     public function filterUsername(FilterCatRequest $request): JsonResponse {
         $query = $request->input('query');
 
-        // Filtrar usuarios cuyo nombre contenga la palabra clave (case insensitive)
+        // Filtrar gatos cuyo nombre contenga la palabra clave (case insensitive)
         $cats = Cat::where('name', 'like', '%' . $query . '%')
             ->orderBy('created_at', 'desc')
-            ->paginate(12);
+            ->get();
+
+        $totalResults = $cats->count();
 
         return response()->json([
             'status' => true,
             'data' => CatResource::collection($cats),
             'meta' => [
-                'current_page' => $cats->currentPage(),
-                'from' => $cats->firstItem(),
-                'last_page' => $cats->lastPage(),
-                'per_page' => $cats->perPage(),
-                'total' => $cats->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $cats->url(1),
-                'last' => $cats->url($cats->lastPage()),
-                'prev' => $cats->previousPageUrl(),
-                'next' => $cats->nextPageUrl(),
-            ]
         ], 200);
     }
 
@@ -79,24 +71,15 @@ class CatController extends Controller
             throw new ModelNotFoundException("No existe el usuario");
         }
 
-        $cats = Cat::where('user_id', $userId)->paginate(12);
+        $cats = Cat::where('user_id', $userId)->get();
+        $totalResults = $cats->count();
 
         return response()->json([
             'status' => true,
             'data' => CatResource::collection($cats),
             'meta' => [
-                'current_page' => $cats->currentPage(),
-                'from' => $cats->firstItem(),
-                'last_page' => $cats->lastPage(),
-                'per_page' => $cats->perPage(),
-                'total' => $cats->total(),
+                'total' => $totalResults,
             ],
-            'links' => [
-                'first' => $cats->url(1),
-                'last' => $cats->url($cats->lastPage()),
-                'prev' => $cats->previousPageUrl(),
-                'next' => $cats->nextPageUrl(),
-            ]
         ]);
     }
 
@@ -116,7 +99,7 @@ class CatController extends Controller
             $result = Cloudinary::upload($request->file('image')->getRealPath());
 
             if (!$result) {
-                throw new HttpException("No se pudo registrar el gato. Error al guardar la imagen.");
+                throw new HttpException(500,"No se pudo registrar el gato. Error al guardar la imagen.");
             }
 
             $cat->image = $result->getSecurePath();
@@ -131,7 +114,7 @@ class CatController extends Controller
                 'data' => new CatResource($cat),
             ], 201);
         } else {
-            throw new HttpException("No se pudo registrar el gato");
+            throw new HttpException(500,"No se pudo registrar el gato");
         }
     }
 
@@ -184,7 +167,7 @@ class CatController extends Controller
             $result = Cloudinary::upload($request->file('image')->getRealPath());
 
             if (!$result) {
-                throw new HttpException("No se pudo actualizar la información del gato. Error al guardar la imagen.");
+                throw new HttpException(500,"No se pudo actualizar la información del gato. Error al guardar la imagen.");
             }
 
             $cat->image = $result->getSecurePath();
@@ -199,7 +182,7 @@ class CatController extends Controller
                 'data' => new CatResource($cat),
             ], 200);
         } else {
-            throw new HttpException("No se pudo actualizar la información del gato");
+            throw new HttpException(500,"No se pudo actualizar la información del gato");
         }
 
     }
@@ -226,7 +209,7 @@ class CatController extends Controller
                 'message' => 'Gato eliminado correctamente',
             ], 200);
         } else {
-            throw new HttpException("No se pudo eliminar el gato");
+            throw new HttpException(500, "No se pudo eliminar el gato");
         }
     }
 }
