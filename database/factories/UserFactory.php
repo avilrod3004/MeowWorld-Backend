@@ -29,6 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'img_profile' => 'https://res.cloudinary.com/dm7ohg3ym/image/upload/v1741976889/klc2umhv7metvok8rgqi.jpg',
         ];
     }
 
