@@ -30,8 +30,6 @@ COPY . .
 # Instalar dependencias de PHP con optimización para producción
 RUN composer install --no-dev --optimize-autoloader
 
-# Generar clave de la aplicación
-RUN php artisan key:generate
 
 # Dar permisos a las carpetas necesarias
 RUN chown -R www-data:www-data /var/www/html \
@@ -42,4 +40,6 @@ RUN chown -R www-data:www-data /var/www/html \
 EXPOSE 9000
 
 # Comando para ejecutar PHP-FPM
-CMD ["php-fpm"]
+# Comando para ejecutar PHP-FPM y generar la clave si no existe
+CMD php artisan key:generate --force && php-fpm
+
