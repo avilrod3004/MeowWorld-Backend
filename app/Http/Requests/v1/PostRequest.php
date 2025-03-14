@@ -6,6 +6,27 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @OA\Schema(
+ *     schema="PostRequest",
+ *     type="object",
+ *     required={"image", "description"},
+ *     @OA\Property(
+ *         property="image",
+ *         type="string",
+ *         format="uri",
+ *         description="Imagen del post. Se requiere que sea de tipo jpeg, png o jpg y no exceda los 2MB.",
+ *         example="https://cloudinary.com/ejemplo-imagen.jpg"
+ *     ),
+ *     @OA\Property(
+ *         property="description",
+ *         type="string",
+ *         description="Descripción del post. Campo obligatorio y con un máximo de 2000 caracteres.",
+ *         example="Este es un post de ejemplo para la documentación Swagger"
+ *     )
+ * )
+ */
+
 class PostRequest extends FormRequest
 {
     /**

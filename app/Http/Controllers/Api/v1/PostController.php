@@ -19,6 +19,25 @@ class PostController extends Controller {
     /**
      * Display a listing of the resource.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/posts",
+     *     summary="Obtiene todos los posts",
+     *     tags={"Posts"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Listado de todos los posts",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Post")),
+     *             @OA\Property(property="meta", type="object",
+     *                 @OA\Property(property="total", type="integer", example=100)
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function index(): JsonResponse {
         $posts = Post::orderBy('created_at', 'desc')->get();
         $totalPosts = Post::count();
@@ -35,6 +54,47 @@ class PostController extends Controller {
     /**
      * Display a listing of the posts by a specific user.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/posts/user/{userId}",
+     *     summary="Obtiene todos los posts de un usuario específico",
+     *     tags={"Posts"},
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         description="ID del usuario cuyo posts se desean obtener",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de posts del usuario",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Post")
+     *             ),
+     *             @OA\Property(
+     *                 property="meta",
+     *                 type="object",
+     *                 @OA\Property(property="total", type="integer", example=5)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Usuario no encontrado"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Error en el servidor"
+     *     )
+     * )
+     */
+
     public function getUserPosts($userId): JsonResponse {
         $posts = Post::where('user_id', $userId)->orderBy('created_at', 'desc')->get();
         $totalResults = $posts->count();
@@ -48,10 +108,6 @@ class PostController extends Controller {
         ], 200);
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(PostRequest $request): JsonResponse {
         $user = Auth::user();
 
@@ -85,6 +141,29 @@ class PostController extends Controller {
     /**
      * Display the specified resource.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/posts/{id}",
+     *     summary="Obtiene un post por ID",
+     *     tags={"Posts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del post",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Post encontrado",
+     *         @OA\JsonContent(ref="#/components/schemas/Post")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Post no encontrado"
+     *     )
+     * )
+     */
     public function show($id): JsonResponse {
         $post = Post::find($id);
 
@@ -101,6 +180,40 @@ class PostController extends Controller {
     /**
      * Update the specified resource in storage.
      * @throws AuthorizationException
+     */
+    /**
+     * @OA\Put(
+     *     path="/api/v1/posts/{id}",
+     *     summary="Actualiza un post",
+     *     tags={"Posts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del post",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(ref="#/components/schemas/PostRequest")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Post actualizado correctamente",
+     *         @OA\JsonContent(ref="#/components/schemas/Post")
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acceso no autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Post no encontrado"
+     *     )
+     * )
      */
     public function update(UpdatePostRequest $request, $id): JsonResponse {
         $post = Post::find($id);
@@ -132,6 +245,37 @@ class PostController extends Controller {
     /**
      * Remove the specified resource from storage.
      * @throws AuthorizationException
+     */
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/posts/{id}",
+     *     summary="Elimina un post",
+     *     tags={"Posts"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del post",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Post eliminado correctamente",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="status", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Post eliminado correctamente")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Acceso no autorizado"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Post no encontrado"
+     *     )
+     * )
      */
     public function destroy($id): JsonResponse {
         $post = Post::find($id);

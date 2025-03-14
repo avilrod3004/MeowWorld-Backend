@@ -5,6 +5,23 @@ namespace App\Http\Resources\v1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @OA\Schema(
+ *     schema="FollowResource",
+ *     type="object",
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="follower", type="object",
+ *         @OA\Property(property="id", type="integer", example=1),
+ *         @OA\Property(property="name", type="string", example="John Doe"),
+ *         @OA\Property(property="username", type="string", example="john_doe")
+ *     ),
+ *     @OA\Property(property="followed", type="object",
+ *         @OA\Property(property="id", type="integer", example=2),
+ *         @OA\Property(property="name", type="string", example="Jane Smith"),
+ *         @OA\Property(property="username", type="string", example="jane_smith")
+ *     )
+ * )
+ */
 class FollowResource extends JsonResource
 {
     /**

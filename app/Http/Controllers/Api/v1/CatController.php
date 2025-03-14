@@ -23,6 +23,30 @@ class CatController extends Controller
     /**
      * Display a listing of the resource.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/cats",
+     *     summary="Obtener lista de gatos",
+     *     tags={"Gatos"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de gatos",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Cat")
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function index(): JsonResponse {
         $cats = Cat::paginate(10);
 
@@ -45,6 +69,37 @@ class CatController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/cats/filter",
+     *     summary="Filtrar gatos por nombre",
+     *     tags={"Gatos"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="query", type="string", example="Fluffy")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de gatos filtrados",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Cat")
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function filterUsername(FilterCatRequest $request): JsonResponse {
         $query = $request->input('query');
 
@@ -64,6 +119,37 @@ class CatController extends Controller
         ], 200);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/users/{userId}/cats",
+     *     summary="Obtener gatos de un usuario",
+     *     tags={"Gatos"},
+     *     @OA\Parameter(
+     *         name="userId",
+     *         in="path",
+     *         required=true,
+     *         description="ID del usuario",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gatos del usuario",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(ref="#/components/schemas/Cat")
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function getUserCats($userId): JsonResponse {
         $user = User::find($userId);
 
@@ -85,6 +171,33 @@ class CatController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     */
+    /**
+     * @OA\Post(
+     *     path="/api/v1/cats",
+     *     summary="Crear un nuevo gato",
+     *     tags={"Gatos"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/Cat")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Gato creado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 ref="#/components/schemas/Cat"
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function store(CatRequest $request) {
         $user = Auth::user();
@@ -121,6 +234,36 @@ class CatController extends Controller
     /**
      * Display the specified resource.
      */
+    /**
+     * @OA\Get(
+     *     path="/api/v1/cats/{id}",
+     *     summary="Mostrar un gato",
+     *     tags={"Gatos"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del gato",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gato encontrado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 ref="#/components/schemas/Cat"
+     *             )
+     *         )
+     *     )
+     * )
+     */
     public function show($id) {
         $cat = Cat::find($id);
 
@@ -137,6 +280,40 @@ class CatController extends Controller
     /**
      * Update the specified resource in storage.
      * @throws AuthorizationException
+     */
+    /**
+     * @OA\Put(
+     *     path="/api/v1/cats/{id}",
+     *     summary="Actualizar un gato",
+     *     tags={"Gatos"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del gato",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/Cat")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gato actualizado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="data",
+     *                 ref="#/components/schemas/Cat"
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function update(UpdateCatRequest $request, $id) {
         $cat = Cat::find($id);
@@ -189,6 +366,37 @@ class CatController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     */
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/cats/{id}",
+     *     summary="Eliminar un gato",
+     *     tags={"Gatos"},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID del gato",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Gato eliminado",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="status",
+     *                 type="boolean",
+     *                 example=true
+     *             ),
+     *             @OA\Property(
+     *                 property="message",
+     *                 type="string",
+     *                 example="Gato eliminado correctamente"
+     *             )
+     *         )
+     *     )
+     * )
      */
     public function destroy($id) {
         $cat = Cat::find($id);
