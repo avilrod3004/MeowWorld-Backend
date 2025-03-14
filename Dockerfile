@@ -27,9 +27,11 @@ COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
 # Copiar los archivos del proyecto
 COPY . .
 
+# Copiar el archivo .env de ejemplo
+COPY .env.example .env
+
 # Instalar dependencias de PHP con optimización para producción
 RUN composer install --no-dev --optimize-autoloader
-
 
 # Dar permisos a las carpetas necesarias
 RUN chown -R www-data:www-data /var/www/html \
@@ -39,7 +41,5 @@ RUN chown -R www-data:www-data /var/www/html \
 # Exponer el puerto 9000 (para FPM)
 EXPOSE 9000
 
-# Comando para ejecutar PHP-FPM
-# Comando para ejecutar PHP-FPM y generar la clave si no existe
+# Comando para generar la clave y arrancar PHP-FPM
 CMD php artisan key:generate --force && php-fpm
-
